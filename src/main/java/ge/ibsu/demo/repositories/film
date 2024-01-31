@@ -1,0 +1,140 @@
+@Entity
+public class Film {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column
+    private String description;
+
+    @Column
+    private int releaseYear;
+
+    // getters and setters
+}
+public interface FilmRepository extends JpaRepository<Film, Long> {
+    // Add custom query methods if needed
+    Page<Film> findByNameContaining(String name, Pageable pageable);
+}
+@Service
+public class FilmService {
+    @Autowired
+    private FilmRepository filmRepository;
+
+    public Page<Film> getAllFilms(Pageable pageable) {
+        return filmRepository.findAll(pageable);
+    }
+
+    public Film getFilmById(Long id) {
+        return filmRepository.findById(id).orElse(null);
+    }
+
+    public Film addFilm(Film film) {
+        return filmRepository.save(film);
+    }
+
+    public Film updateFilm(Long id, Film updatedFilm) {
+        Film existingFilm = filmRepository.findById(id).orElse(null);
+        if (existingFilm != null) {
+            existingFilm.setName(updatedFilm.getName());
+            existingFilm.setDescription(updatedFilm.getDescription());
+            existingFilm.setReleaseYear(updatedFilm.getReleaseYear());
+            return filmRepository.save(existingFilm);
+        }
+        return null;
+    }
+
+    public void deleteFilm(Long id) {
+        filmRepository.deleteById(id);
+    }
+
+    public Page<Film> searchFilmsByName(String name, Pageable pageable) {
+        return filmRepository.findByNameContaining(name, pageable);
+    }
+}
+@Service
+public class FilmService {
+    @Autowired
+    private FilmRepository filmRepository;
+
+    public Page<Film> getAllFilms(Pageable pageable) {
+        return filmRepository.findAll(pageable);
+    }
+
+    public Film getFilmById(Long id) {
+        return filmRepository.findById(id).orElse(null);
+    }
+
+    public Film addFilm(Film film) {
+        return filmRepository.save(film);
+    }
+
+    public Film updateFilm(Long id, Film updatedFilm) {
+        Film existingFilm = filmRepository.findById(id).orElse(null);
+        if (existingFilm != null) {
+            existingFilm.setName(updatedFilm.getName());
+            existingFilm.setDescription(updatedFilm.getDescription());
+            existingFilm.setReleaseYear(updatedFilm.getReleaseYear());
+            return filmRepository.save(existingFilm);
+        }
+        return null;
+    }
+
+    public void deleteFilm(Long id) {
+        filmRepository.deleteById(id);
+    }
+
+    public Page<Film> searchFilmsByName(String name, Pageable pageable) {
+        return filmRepository.findByNameContaining(name, pageable);
+    }
+}
+@RestController
+@RequestMapping("/films")
+public class FilmController {
+    @Autowired
+    private FilmService filmService;
+
+    @GetMapping
+    public ResponseEntity<Page<Film>> getAllFilms(Pageable pageable) {
+        return ResponseEntity.ok(filmService.getAllFilms(pageable));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Film> getFilmById(@PathVariable Long id) {
+        Film film = filmService.getFilmById(id);
+        return film != null ? ResponseEntity.ok(film) : ResponseEntity.notFound().build();
+    }
+
+    @PostMapping
+    public ResponseEntity<Film> addFilm(@RequestBody Film film) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(filmService.addFilm(film));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Film> updateFilm(@PathVariable Long id, @RequestBody Film updatedFilm) {
+        Film film = filmService.updateFilm(id, updatedFilm);
+        return film != null ? ResponseEntity.ok(film) : ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteFilm(@PathVariable Long id) {
+        filmService.deleteFilm(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<Film>> searchFilmsByName(
+            @RequestParam(name = "name", required = false) String name,
+            Pageable pageable) {
+        return ResponseEntity.ok(filmService.searchFilmsByName(name, pageable));
+    }
+}
+spring.datasource.url=jdbc:mysql://localhost:3306/your_database
+spring.datasource.username=your_username
+spring.datasource.password=your_password
+spring.jpa.hibernate.ddl-auto=update
+
+
